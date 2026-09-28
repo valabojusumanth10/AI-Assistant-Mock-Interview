@@ -2,31 +2,34 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import axiosInstance from "@/lib/axios";
 
 type Status = "verifying" | "success" | "error";
 
 export default function VerifyEmailPage() {
   const router = useRouter();
 
-  const [status, setStatus] = useState<Status>("verifying");
+  const [status, setStatus] =
+    useState<Status>("verifying");
+
   const [message, setMessage] = useState(
     "We're verifying your email address..."
   );
 
-  const verificationStarted = useRef(false);
-
-  const getToken = () => {
-    if (typeof window === "undefined") {
-      return null;
-    }
-
-    const params = new URLSearchParams(window.location.search);
-    return params.get("token");
-  };
+  const verificationStarted =
+    useRef(false);
 
   useEffect(() => {
-    const token = getToken();
+    if (verificationStarted.current) {
+      return;
+    }
+
+    verificationStarted.current = true;
+
+    const params = new URLSearchParams(
+      window.location.search
+    );
+
+    const token = params.get("token");
 
     if (!token) {
       setStatus("error");
@@ -36,39 +39,46 @@ export default function VerifyEmailPage() {
       return;
     }
 
-    if (verificationStarted.current) {
-      return;
-    }
-
-    verificationStarted.current = true;
-
     verifyEmail(token);
   }, []);
 
   const verifyEmail = async (token: string) => {
     try {
       setStatus("verifying");
-      setMessage("We're verifying your email address...");
+      setMessage(
+        "We're verifying your email address..."
+      );
 
-      const response = await axiosInstance.post(
-        "/api/auth/verify-email",
+      const apiUrl =
+        process.env.NEXT_PUBLIC_API_URL ||
+        "http://localhost:5000";
+
+      const response = await fetch(
+        `${apiUrl}/api/auth/verify-email`,
         {
-          token,
-        },
-        {
-          validateStatus: (status) =>
-            status >= 200 && status < 500,
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            token,
+          }),
         }
       );
 
-      if (
-        response.status >= 200 &&
-        response.status < 300
-      ) {
+      let data: any = null;
+
+      try {
+        data = await response.json();
+      } catch {
+        data = null;
+      }
+
+      if (response.ok) {
         setStatus("success");
 
         setMessage(
-          response.data?.message ||
+          data?.message ||
             "Your email has been successfully verified."
         );
 
@@ -78,10 +88,10 @@ export default function VerifyEmailPage() {
       setStatus("error");
 
       setMessage(
-        response.data?.message ||
+        data?.message ||
           "This verification link is invalid or has expired."
       );
-    } catch (error: any) {
+    } catch (error) {
       console.error(
         "EMAIL VERIFICATION ERROR:",
         error
@@ -90,8 +100,7 @@ export default function VerifyEmailPage() {
       setStatus("error");
 
       setMessage(
-        error.response?.data?.message ||
-          "Something went wrong while verifying your email. Please try again."
+        "Something went wrong while verifying your email. Please try again."
       );
     }
   };
@@ -101,7 +110,11 @@ export default function VerifyEmailPage() {
   };
 
   const handleRetry = () => {
-    const token = getToken();
+    const params = new URLSearchParams(
+      window.location.search
+    );
+
+    const token = params.get("token");
 
     if (!token) {
       setStatus("error");
@@ -110,8 +123,6 @@ export default function VerifyEmailPage() {
       );
       return;
     }
-
-    verificationStarted.current = true;
 
     verifyEmail(token);
   };
