@@ -1,269 +1,427 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { usePathname, useRouter } from "next/navigation";
+import { useContext, useEffect, useState } from "react";
+
+import { AuthContext, type UserRole } from "@/context/AuthContext";
 import { useAuth } from "@/hooks/useAuth";
-import { useEffect, useState } from "react";
 
-export function Navbar() {
-  const router = useRouter();
+type NavLink = {
+  href: string;
+  label: string;
+  roles: UserRole[];
+};
+
+const navLinks: NavLink[] = [
+  {
+    href: "/dashboard",
+    label: "Dashboard",
+    roles: ["student"],
+  },
+  {
+    href: "/practice",
+    label: "Practice",
+    roles: ["student"],
+  },
+  {
+    href: "/history",
+    label: "My Sessions",
+    roles: ["student"],
+  },
+  {
+    href: "/challenges",
+    label: "Arena",
+    roles: ["student"],
+  },
+  {
+    href: "/mentor",
+    label: "Mentor Dashboard",
+    roles: ["mentor"],
+  },
+  {
+    href: "/admin",
+    label: "Admin Dashboard",
+    roles: ["admin"],
+  },
+  {
+    href: "/security",
+    label: "Security",
+    roles: ["student", "mentor", "admin"],
+  },
+];
+
+export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
 
-  // ✅ Single source of truth — no more getToken() / removeToken()
-  const { isLoggedIn, user, logout } = useAuth();
+  /*
+   * ------------------------------------------------------------
+   * AUTH SOURCE #1
+   * ------------------------------------------------------------
+   *
+   * Your layout provides AuthProvider, so we can read AuthContext.
+   */
+  const authContext = useContext(AuthContext);
+
+  const contextUser = authContext?.user ?? null;
+  const contextLoggedIn = authContext?.isLoggedIn ?? false;
+  const contextLogout = authContext?.logout;
+
+  /*
+   * ------------------------------------------------------------
+   * AUTH SOURCE #2
+   * ------------------------------------------------------------
+   *
+   * Your dashboard/authenticated pages also use useAuth().
+   *
+   * We keep this as a fallback because your project currently has
+   * two authentication states.
+   */
+  const hookAuth = useAuth();
+
+  const hookUser = hookAuth?.user ?? null;
+  const hookLoggedIn = hookAuth?.isLoggedIn ?? false;
+  const hookLogout = hookAuth?.logout;
+
+  /*
+   * ------------------------------------------------------------
+   * RESOLVE THE ACTUAL LOGGED-IN USER
+   * ------------------------------------------------------------
+   *
+   * If AuthContext has a user, use it.
+   * Otherwise fall back to useAuth().
+   *
+   * This fixes the situation where the dashboard knows the user
+   * but AuthContext has not been populated yet.
+   */
+  const user =
+    contextUser && contextLoggedIn
+      ? contextUser
+      : hookUser && hookLoggedIn
+        ? hookUser
+        : contextUser ?? hookUser ?? null;
+
+  const isLoggedIn =
+    contextLoggedIn ||
+    hookLoggedIn ||
+    Boolean(user);
+
+  const role = user?.role as UserRole | undefined;
+
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
-  // Scroll detection
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  // Close mobile menu on route change
+  /*
+   * Close mobile navigation when changing pages.
+   */
   useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
 
-  const isActive = (path: string) => pathname === path;
+  /*
+   * ------------------------------------------------------------
+   * IMPORTANT
+   * ------------------------------------------------------------
+   *
+   * Don't render the Navbar on login/register pages or while
+   * authentication is genuinely unavailable.
+   *
+   * But if we have a user from either auth system, render it.
+   */
+  if (!isLoggedIn || !user || !role) {
+    return null;
+  }
 
-  // User's first initial for avatar
-  const initial = user?.name?.charAt(0).toUpperCase() ?? "U";
-  const firstName = user?.name?.split(" ")[0] ?? "there";
+  /*
+   * Only show links allowed for the current role.
+   */
+  const visibleLinks = navLinks.filter((link) =>
+    link.roles.includes(role)
+  );
 
-  const navLinks = isLoggedIn
-    ? [
-        { href: "/dashboard", label: "Dashboard", icon: "⚡" },
-        { href: "/practice", label: "Practice", icon: "🎯" },
-        { href: "/history", label: "My Sessions", icon: "📊" },
-      ]
-    : [
-        { href: "/#features", label: "Features", icon: "✨" },
-        { href: "/#how-it-works", label: "How It Works", icon: "🔍" },
-        { href: "/#domains", label: "Domains", icon: "🧩" },
-      ];
+  /*
+   * Home page based on role.
+   */
+  const homeHref =
+    role === "admin"
+      ? "/admin"
+      : role === "mentor"
+        ? "/mentor"
+        : "/dashboard";
+
+  /*
+   * ------------------------------------------------------------
+   * ACTIVE LINK
+   * ------------------------------------------------------------
+   */
+  const isActive = (href: string) => {
+    if (href === "/dashboard") {
+      return pathname === "/dashboard";
+    }
+
+    return (
+      pathname === href ||
+      pathname.startsWith(`${href}/`)
+    );
+  };
+
+  /*
+   * ------------------------------------------------------------
+   * LOGOUT
+   * ------------------------------------------------------------
+   *
+   * Try both auth systems so whichever one currently owns the
+   * authenticated state gets cleared.
+   */
+  const handleLogout = async () => {
+    if (loggingOut) {
+      return;
+    }
+
+    setLoggingOut(true);
+
+    try {
+      /*
+       * If both systems exist, calling both logout methods is
+       * intentional. This keeps their localStorage/state in sync.
+       */
+      const logoutPromises: Promise<unknown>[] = [];
+
+      if (contextLogout) {
+        logoutPromises.push(
+          Promise.resolve(contextLogout()).catch((error) => {
+            console.error("AuthContext logout error:", error);
+          })
+        );
+      }
+
+      if (hookLogout) {
+        logoutPromises.push(
+          Promise.resolve(hookLogout()).catch((error) => {
+            console.error("useAuth logout error:", error);
+          })
+        );
+      }
+
+      if (logoutPromises.length > 0) {
+        await Promise.all(logoutPromises);
+      }
+
+      /*
+       * Extra cleanup for the duplicated auth architecture.
+       * This prevents stale authentication from bringing the user
+       * back into the application after logout.
+       */
+      try {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        localStorage.removeItem("sessionId");
+      } catch (storageError) {
+        console.error(
+          "Could not clear localStorage:",
+          storageError
+        );
+      }
+    } catch (error) {
+      console.error("Logout failed:", error);
+    } finally {
+      setMobileOpen(false);
+      setLoggingOut(false);
+
+      router.replace("/login");
+    }
+  };
 
   return (
-    <nav
-      className={`sticky top-0 z-50 w-full transition-all duration-300 ${
-        scrolled
-          ? "bg-background/80 backdrop-blur-xl border-b border-border/60 shadow-sm"
-          : "bg-transparent border-b border-transparent"
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* ── Logo ── */}
-          <Link
-            href="/"
-            className="flex items-center gap-2.5 group flex-shrink-0"
-          >
-            <div className="relative w-9 h-9">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary to-accent rounded-xl rotate-6 opacity-40 group-hover:rotate-12 transition-transform duration-300" />
-              <div className="relative w-9 h-9 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center shadow-md">
-                <span className="text-white font-black text-sm tracking-tight">
-                  AI
-                </span>
-              </div>
-            </div>
-            <div className="flex flex-col leading-none">
-              <span className="text-base font-black bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent tracking-tight">
-                MockInterview
-              </span>
-              <span className="text-[10px] text-muted-foreground font-medium tracking-widest uppercase">
-                AI Powered
-              </span>
-            </div>
-          </Link>
+    <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/95 backdrop-blur">
+      <nav className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
-          {/* ── Desktop Nav Links ── */}
-          <div className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <Link key={link.href} href={link.href}>
-                <button
-                  className={`relative px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ${
-                    isActive(link.href)
-                      ? "text-primary bg-primary/10"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                  }`}
-                >
-                  <span className="flex items-center gap-1.5">
-                    <span className="text-xs">{link.icon}</span>
-                    {link.label}
-                  </span>
-                  {isActive(link.href) && (
-                    <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
-                  )}
-                </button>
-              </Link>
-            ))}
+        {/* ======================================================
+            LOGO
+        ====================================================== */}
+        <Link
+          href={homeHref}
+          onClick={() => setMobileOpen(false)}
+          className="flex items-center gap-2"
+        >
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-black text-white">
+            <span className="text-sm font-bold">
+              AI
+            </span>
           </div>
 
-          {/* ── Desktop Auth Controls ── */}
-          <div className="hidden md:flex items-center gap-2">
-            {isLoggedIn ? (
-              <>
-                {/* User pill — now shows real name initial + first name */}
-                <div className="flex items-center gap-2 bg-muted/50 border border-border/60 rounded-full pl-1.5 pr-3 py-1">
-                  <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0">
-                    <span className="text-white text-[10px] font-black">
-                      {initial}
-                    </span>
-                  </div>
-                  <span className="text-sm text-muted-foreground font-medium">
-                    Hi,{" "}
-                    <span className="text-foreground font-semibold">
-                      {firstName}
-                    </span>
-                  </span>
-                </div>
+          <div className="hidden sm:block">
+            <div className="text-sm font-bold leading-tight text-gray-900">
+              AI Mock Interview
+            </div>
 
-                <Button
-                  onClick={logout}
-                  variant="outline"
-                  size="sm"
-                  className="rounded-full border-border/60 hover:border-destructive/50 hover:text-destructive hover:bg-destructive/5 transition-colors"
-                >
-                  Logout
-                </Button>
-              </>
-            ) : (
-              <>
-                <Link href="/login">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className={`rounded-full transition-colors ${
-                      isActive("/login")
-                        ? "bg-muted text-foreground"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    Login
-                  </Button>
-                </Link>
-                <Link href="/register">
-                  <Button
-                    size="sm"
-                    className="rounded-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white shadow-md hover:shadow-primary/25 hover:shadow-lg transition-all duration-200 font-semibold"
-                  >
-                    Get Started →
-                  </Button>
-                </Link>
-              </>
-            )}
+            <div className="text-[11px] leading-tight text-gray-500">
+              Interview smarter
+            </div>
           </div>
+        </Link>
 
-          {/* ── Mobile Hamburger ── */}
-          <button
-            onClick={() => setMobileOpen((v) => !v)}
-            className="md:hidden relative w-9 h-9 flex flex-col items-center justify-center gap-1.5 rounded-xl hover:bg-muted/50 transition-colors"
-            aria-label="Toggle menu"
-          >
-            <span
-              className={`block h-0.5 w-5 bg-foreground rounded-full transition-all duration-300 origin-center ${mobileOpen ? "rotate-45 translate-y-2" : ""}`}
-            />
-            <span
-              className={`block h-0.5 w-5 bg-foreground rounded-full transition-all duration-300 ${mobileOpen ? "opacity-0 scale-x-0" : ""}`}
-            />
-            <span
-              className={`block h-0.5 w-5 bg-foreground rounded-full transition-all duration-300 origin-center ${mobileOpen ? "-rotate-45 -translate-y-2" : ""}`}
-            />
-          </button>
-        </div>
-      </div>
+        {/* ======================================================
+            DESKTOP NAVIGATION
+        ====================================================== */}
+        <div className="hidden items-center gap-1 md:flex">
+          {visibleLinks.map((link) => {
+            const active = isActive(link.href);
 
-      {/* ── Mobile Menu Panel ── */}
-      <div
-        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-          mobileOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
-        }`}
-      >
-        <div className="bg-background/95 backdrop-blur-xl border-t border-border/50 px-4 py-4 space-y-1">
-          {/* Nav links */}
-          {navLinks.map((link) => (
-            <Link key={link.href} href={link.href}>
-              <div
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-                  isActive(link.href)
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
+                  active
+                    ? "bg-gray-100 text-gray-900"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                 }`}
               >
-                <span className="text-lg">{link.icon}</span>
-                <span className="font-medium">{link.label}</span>
-                {isActive(link.href) && (
-                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />
-                )}
-              </div>
-            </Link>
-          ))}
-
-          <div className="h-px bg-border/50 my-3" />
-
-          {/* Mobile auth actions */}
-          {isLoggedIn ? (
-            <div className="space-y-2">
-              {/* User info row — real name + email from context */}
-              <div className="flex items-center gap-3 px-4 py-2">
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0">
-                  <span className="text-white text-sm font-black">
-                    {initial}
-                  </span>
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-foreground truncate">
-                    {user?.name ?? "Welcome back"}
-                  </p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {user?.email ?? "Ready to practice?"}
-                  </p>
-                </div>
-              </div>
-
-              {/* Quick action links */}
-              <div className="grid grid-cols-2 gap-2 px-1">
-                {[
-                  { href: "/dashboard", label: "Dashboard", icon: "⚡" },
-                  { href: "/history", label: "History", icon: "📊" },
-                ].map((item) => (
-                  <Link key={item.href} href={item.href}>
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted/40 hover:bg-muted/70 transition-colors">
-                      <span className="text-sm">{item.icon}</span>
-                      <span className="text-xs font-medium text-foreground">
-                        {item.label}
-                      </span>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-
-              <Button
-                onClick={logout}
-                variant="outline"
-                className="w-full rounded-xl border-border/60 hover:border-destructive/50 hover:text-destructive hover:bg-destructive/5"
-              >
-                Logout
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-2 pt-1">
-              <Link href="/login" className="block">
-                <Button variant="outline" className="w-full rounded-xl">
-                  Login
-                </Button>
+                {link.label}
               </Link>
-              <Link href="/register" className="block">
-                <Button className="w-full rounded-xl bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white font-semibold">
-                  Get Started Free →
-                </Button>
-              </Link>
-            </div>
-          )}
+            );
+          })}
         </div>
-      </div>
-    </nav>
+
+        {/* ======================================================
+            DESKTOP USER SECTION
+        ====================================================== */}
+        <div className="hidden items-center gap-3 md:flex">
+
+          <div className="text-right">
+            <p className="max-w-[180px] truncate text-sm font-semibold text-gray-900">
+              {user.name || "User"}
+            </p>
+
+            <p className="text-xs capitalize text-gray-500">
+              {role}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={loggingOut}
+            className="rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {loggingOut ? "Logging out..." : "Logout"}
+          </button>
+        </div>
+
+        {/* ======================================================
+            MOBILE MENU BUTTON
+        ====================================================== */}
+        <button
+          type="button"
+          aria-label={
+            mobileOpen
+              ? "Close navigation menu"
+              : "Open navigation menu"
+          }
+          aria-expanded={mobileOpen}
+          onClick={() =>
+            setMobileOpen((previous) => !previous)
+          }
+          className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 md:hidden"
+        >
+          {mobileOpen ? (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="h-5 w-5"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6 6l12 12M18 6L6 18"
+              />
+            </svg>
+          ) : (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="h-5 w-5"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          )}
+        </button>
+      </nav>
+
+      {/* ========================================================
+          MOBILE NAVIGATION
+      ======================================================== */}
+      {mobileOpen && (
+        <div className="border-t border-gray-200 bg-white md:hidden">
+          <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
+
+            {/* User information */}
+            <div className="mb-3 rounded-xl bg-gray-50 p-3">
+              <p className="truncate text-sm font-semibold text-gray-900">
+                {user.name || "User"}
+              </p>
+
+              <p className="mt-1 text-xs capitalize text-gray-500">
+                {role}
+              </p>
+
+              {user.email && (
+                <p className="mt-1 truncate text-xs text-gray-400">
+                  {user.email}
+                </p>
+              )}
+            </div>
+
+            {/* Navigation links */}
+            <div className="space-y-1">
+              {visibleLinks.map((link) => {
+                const active = isActive(link.href);
+
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={`block rounded-lg px-3 py-3 text-sm font-medium transition ${
+                      active
+                        ? "bg-gray-100 text-gray-900"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
+            </div>
+
+            {/* Mobile logout */}
+            <div className="mt-3 border-t border-gray-200 pt-3">
+              <button
+                type="button"
+                onClick={handleLogout}
+                disabled={loggingOut}
+                className="w-full rounded-lg border border-gray-200 px-3 py-3 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {loggingOut
+                  ? "Logging out..."
+                  : "Logout"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </header>
   );
 }

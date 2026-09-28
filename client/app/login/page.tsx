@@ -1,125 +1,346 @@
 "use client";
+
+import {
+  FormEvent,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
+import { useRouter } from "next/navigation";
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/hooks/useAuth";
-import Link from "next/link";
-import React, { useState } from "react";
 
-const page = () => {
+import {
+  useAuth,
+  type AuthUser,
+} from "@/hooks/useAuth";
+
+export default function LoginPage() {
+  const router = useRouter();
+
+  const {
+    login,
+    loading,
+    isLoggedIn,
+    user,
+  } = useAuth();
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-  const { login, isLoading } = useAuth();
+
   const [error, setError] = useState("");
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+
+  const hasRedirected = useRef(false);
+
+  const routeUser = (currentUser: AuthUser) => {
+    if (!currentUser) {
+      return;
+    }
+
+    
+    if (hasRedirected.current) {
+      return;
+    }
+
+    hasRedirected.current = true;
+
+    // ADMIN
+    if (currentUser.role === "admin") {
+      router.replace("/admin");
+      return;
+    }
+
+  
+    if (currentUser.role === "mentor") {
+      router.replace("/mentor");
+      return;
+    }
+
+    if (currentUser.roleSelectionCompleted !== true) {
+      router.replace("/select-role");
+      return;
+    }
+
+   
+    router.replace("/dashboard");
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    try {
-      await login(formData.email, formData.password);
-    } catch (error) {
-      setError("Invalid email or password. Please try again.");
+
+  useEffect(() => {
+    if (loading) {
+      return;
+    }
+
+    if (!isLoggedIn || !user) {
+      return;
+    }
+
+    routeUser(user);
+  }, [
+    loading,
+    isLoggedIn,
+    user,
+  ]);
+
+  const handleChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const {
+      name,
+      value,
+    } = event.target;
+
+    setFormData((previous) => ({
+      ...previous,
+      [name]: value,
+    }));
+
+    if (error) {
+      setError("");
     }
   };
+
+
+  const handleSubmit = async (
+    event: FormEvent<HTMLFormElement>,
+  ) => {
+    event.preventDefault();
+
+    setError("");
+
+    hasRedirected.current = false;
+
+    const email =
+      formData.email
+        .trim()
+        .toLowerCase();
+
+    const password =
+      formData.password;
+
+ 
+    if (!email) {
+      setError(
+        "Please enter your email address.",
+      );
+      return;
+    }
+
+    if (!password) {
+      setError(
+        "Please enter your password.",
+      );
+      return;
+    }
+
+    try {
+   
+      const result = await login(
+        email,
+        password,
+      );
+
+   
+      const loggedInUser =
+        result?.user;
+
+      if (!loggedInUser) {
+        throw new Error(
+          "Login succeeded but user information was not returned.",
+        );
+      }
+
+
+      routeUser(loggedInUser);
+    } catch (err: any) {
+      console.error(
+        "Login error:",
+        err,
+      );
+
+ 
+      hasRedirected.current = false;
+
+      const responseMessage =
+        err?.response?.data?.message;
+
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "";
+
+      setError(
+        responseMessage ||
+          errorMessage ||
+          "Invalid email or password. Please try again.",
+      );
+    }
+  };
+
+
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-secondary px-4 py-8">
-      <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="flex justify-center mb-8">
-          <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-lg">AI</span>
-          </div>
-        </div>
+    <main className="min-h-screen bg-background px-4 py-10">
+      <div className="mx-auto flex min-h-[80vh] max-w-md items-center justify-center">
 
-        <Card className="p-8 border border-border/50 shadow-lg">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2 text-center">
-              Welcome Back
+        <div className="w-full">
+
+  
+
+          <div className="mb-8 text-center">
+
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-r from-primary to-accent text-lg font-black text-white shadow-lg">
+              AI
+            </div>
+
+            <h1 className="mt-6 text-3xl font-bold text-foreground">
+              Welcome back
             </h1>
-            <p className="text-center text-muted-foreground">
-              Sign in to continue your interview practice
+
+            <p className="mt-2 text-sm text-muted-foreground">
+              Sign in to continue your Placement AI journey.
             </p>
+
           </div>
 
-          {error && (
-            <div className="mb-6 p-4 bg-destructive/10 text-destructive rounded-lg text-sm border border-destructive/20">
-              {error}
-            </div>
-          )}
+      
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-semibold mb-2 text-foreground"
-              >
-                Email Address
-              </label>
-              <Input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="you@example.com"
-                required
-                className="rounded-lg"
-              />
-            </div>
+          <Card className="border border-border/50 p-6 shadow-lg sm:p-8">
 
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-semibold mb-2 text-foreground"
-              >
-                Password
-              </label>
-              <Input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="••••••••"
-                required
-                className="rounded-lg"
-              />
-            </div>
-
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white font-semibold rounded-full py-2 mt-6"
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-5"
             >
-              {isLoading ? "Signing In..." : "Sign In"}
-            </Button>
-          </form>
 
-          <div className="mt-6 text-center text-sm">
-            <span className="text-muted-foreground">
-              Don&apos;t have an account?{" "}
-            </span>
-            <Link
-              href="/register"
-              className="text-primary font-semibold hover:underline"
-            >
-              Create one
-            </Link>
+
+              {error && (
+                <div className="rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3 text-sm text-red-600 dark:text-red-400">
+                  {error}
+                </div>
+              )}
+
+            
+
+              <div>
+
+                <label
+                  htmlFor="email"
+                  className="mb-2 block text-sm font-semibold text-foreground"
+                >
+                  Email Address
+                </label>
+
+                <Input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="you@example.com"
+                  required
+                  autoComplete="email"
+                  disabled={loading}
+                  className="rounded-lg"
+                />
+
+              </div>
+
+           
+
+              <div>
+
+                <div className="mb-2 flex items-center justify-between">
+
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-semibold text-foreground"
+                  >
+                    Password
+                  </label>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      router.push(
+                        "/forgot-password",
+                      )
+                    }
+                    disabled={loading}
+                    className="text-xs font-semibold text-primary transition hover:opacity-80 disabled:opacity-50"
+                  >
+                    Forgot password?
+                  </button>
+
+                </div>
+
+                <Input
+                  type="password"
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="••••••••"
+                  required
+                  autoComplete="current-password"
+                  disabled={loading}
+                  className="rounded-lg"
+                />
+
+              </div>
+
+
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full rounded-full bg-gradient-to-r from-primary to-accent font-semibold text-white hover:opacity-90"
+              >
+                {loading
+                  ? "Signing In..."
+                  : "Sign In"}
+              </Button>
+
+            </form>
+
+            
+
+            <div className="mt-6 text-center text-sm">
+
+              <span className="text-muted-foreground">
+                Don't have an account?{" "}
+              </span>
+
+              <button
+                type="button"
+                onClick={() =>
+                  router.push("/register")
+                }
+                className="font-semibold text-primary hover:underline"
+              >
+                Create Account
+              </button>
+
+            </div>
+
+          </Card>
+
+      
+
+          <div className="mt-6 text-center">
+
+            <p className="text-xs leading-5 text-muted-foreground">
+              🔒 Your account is protected with secure
+              authentication and session management.
+            </p>
+
           </div>
-        </Card>
 
-        <p className="text-center text-xs text-muted-foreground mt-6">
-          Protected by enterprise-grade security
-        </p>
+        </div>
       </div>
-    </div>
+    </main>
   );
-};
-
-export default page;
+}
