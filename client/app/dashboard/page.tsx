@@ -187,42 +187,42 @@ interface RoadmapData {
 const INTERVIEW_DOMAINS = [
   {
     label: "JavaScript/Node.js",
-    icon: "ðŸŸ¨",
+    icon: "",
     desc: "ES6+, async, Node runtime",
   },
   {
     label: "React",
-    icon: "âš›ï¸",
+    icon: "",
     desc: "Hooks, state, lifecycle",
   },
   {
     label: "Python",
-    icon: "ðŸ",
+    icon: "",
     desc: "OOP, data structures, stdlib",
   },
   {
     label: "Data Science",
-    icon: "ðŸ“Š",
+    icon: "",
     desc: "ML, pandas, statistics",
   },
   {
     label: "DevOps",
-    icon: "âš™ï¸",
+    icon: "",
     desc: "CI/CD, Docker, Kubernetes",
   },
   {
     label: "System Design",
-    icon: "ðŸ—ï¸",
+    icon: "",
     desc: "Scalability, architecture",
   },
   {
     label: "Database Design",
-    icon: "ðŸ—„ï¸",
+    icon: "",
     desc: "SQL, NoSQL, indexing",
   },
   {
     label: "General",
-    icon: "ðŸŽ¯",
+    icon: "",
     desc: "Behavioural & fundamentals",
   },
 ];
@@ -246,10 +246,10 @@ function ScoreBadge({ score }: { score: number }) {
       className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-xs font-bold ${className}`}
     >
       {safeScore >= 80
-        ? "ðŸŸ¢"
+        ? ""
         : safeScore >= 60
-          ? "ðŸ”µ"
-          : "ðŸŸ "}{" "}
+          ? ""
+          : ""}{" "}
       {safeScore}%
     </span>
   );
@@ -363,10 +363,10 @@ function ResumePanel({
     useState(0);
 
   const analyzingSteps = [
-    "Reading your resumeâ€¦",
-    "Detecting skills & technologiesâ€¦",
-    "Mapping to interview domainsâ€¦",
-    "Generating recommendationsâ€¦",
+    "Reading your resume…",
+    "Detecting skills & technologies…",
+    "Mapping to interview domains…",
+    "Generating recommendations…",
   ];
 
   const handleFile = (selectedFile: File) => {
@@ -482,7 +482,7 @@ function ResumePanel({
       <div className="px-5 py-4 border-b border-border/40 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-lg">
-            ðŸ“„
+
           </div>
 
           <div>
@@ -491,7 +491,7 @@ function ResumePanel({
             </p>
 
             <p className="text-xs text-muted-foreground">
-              Upload your resume Â· Get domain
+              Upload your resume · Get domain
               recommendations
             </p>
           </div>
@@ -503,7 +503,7 @@ function ResumePanel({
             onClick={reset}
             className="text-xs text-muted-foreground hover:text-foreground border border-border/60 px-3 py-1 rounded-full"
           >
-            Upload new â†‘
+            Upload new ↑
           </button>
         )}
       </div>
@@ -564,7 +564,7 @@ function ResumePanel({
               {file ? (
                 <div className="flex items-center justify-center gap-3">
                   <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-2xl">
-                    ðŸ“‹
+
                   </div>
 
                   <div className="text-left">
@@ -588,13 +588,13 @@ function ResumePanel({
                     }}
                     className="w-7 h-7 rounded-full bg-muted flex items-center justify-center"
                   >
-                    âœ•
+
                   </button>
                 </div>
               ) : (
                 <div>
                   <div className="text-4xl mb-3">
-                    â˜ï¸
+
                   </div>
 
                   <p className="text-sm font-semibold">
@@ -602,8 +602,8 @@ function ResumePanel({
                   </p>
 
                   <p className="text-xs text-muted-foreground mt-1">
-                    or click to browse Â· PDF,
-                    DOC, DOCX, TXT Â· Max 5 MB
+                    or click to browse · PDF,
+                    DOC, DOCX, TXT · Max 5 MB
                   </p>
                 </div>
               )}
@@ -611,7 +611,7 @@ function ResumePanel({
 
             {error && (
               <p className="text-xs text-destructive bg-destructive/10 border border-destructive/20 px-3 py-2.5 rounded-xl">
-                âš ï¸ {error}
+                 {error}
               </p>
             )}
 
@@ -620,7 +620,7 @@ function ResumePanel({
               disabled={!file}
               className="w-full rounded-xl bg-gradient-to-r from-primary to-accent text-white font-semibold"
             >
-              ðŸ¤– Analyse Resume with AI
+               Analyse Resume with AI
             </Button>
           </div>
         )}
@@ -633,13 +633,13 @@ function ResumePanel({
               <div className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin" />
 
               <div className="absolute inset-0 flex items-center justify-center text-2xl">
-                ðŸ¤–
+
               </div>
             </div>
 
             <div className="text-center">
               <p className="text-sm font-bold">
-                Groq AI is reading your resumeâ€¦
+                Groq AI is reading your resume…
               </p>
 
               <p className="text-xs text-muted-foreground mt-1">
@@ -658,7 +658,7 @@ function ResumePanel({
             <div className="space-y-5">
               <div className="p-4 bg-primary/5 border border-primary/20 rounded-xl">
                 <div className="flex items-center gap-2 mb-2">
-                  <span>ðŸ§ </span>
+                  <span></span>
 
                   <p className="text-xs font-bold">
                     AI Summary
@@ -680,7 +680,7 @@ function ResumePanel({
                 ?.length > 0 && (
                 <div>
                   <p className="text-xs font-bold mb-2">
-                    ðŸ›  Skills Detected
+                     Skills Detected
                   </p>
 
                   <div className="flex flex-wrap gap-1.5">
@@ -700,7 +700,7 @@ function ResumePanel({
 
               <div>
                 <p className="text-xs font-bold mb-2">
-                  ðŸŽ¯ Recommended Interview
+                   Recommended Interview
                   Domains
                 </p>
 
@@ -734,7 +734,7 @@ function ResumePanel({
                         >
                           <span className="text-xl">
                             {meta?.icon ||
-                              "ðŸŽ¯"}
+                              ""}
                           </span>
 
                           <div className="flex-1">
@@ -768,7 +768,7 @@ function ResumePanel({
                 ?.length > 0 && (
                 <div className="p-4 bg-green-500/5 border border-green-500/20 rounded-xl">
                   <p className="text-xs font-bold text-green-600 mb-2">
-                    âœ… Your Strengths
+                     Your Strengths
                   </p>
 
                   <ul className="space-y-1.5">
@@ -778,7 +778,7 @@ function ResumePanel({
                           key={strength}
                           className="text-xs text-muted-foreground"
                         >
-                          â€¢ {strength}
+                          • {strength}
                         </li>
                       ),
                     )}
@@ -1223,7 +1223,7 @@ export default function DashboardPage() {
           <div className="w-10 h-10 rounded-full border-4 border-primary border-t-transparent animate-spin" />
 
           <p className="text-sm text-muted-foreground">
-            Loadingâ€¦
+            Loading…
           </p>
         </div>
       </div>
@@ -1339,7 +1339,7 @@ export default function DashboardPage() {
         <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <p className="text-sm text-muted-foreground font-medium mb-1">
-              ðŸ‘‹ Welcome back
+               Welcome back
               {user?.name
                 ? `, ${user.name.split(" ")[0]}`
                 : ""}
@@ -1357,7 +1357,7 @@ export default function DashboardPage() {
             }
             className="bg-gradient-to-r from-primary to-accent text-white rounded-full px-6 font-semibold"
           >
-            âš¡ New Interview
+             New Interview
           </Button>
         </section>
 
@@ -1372,7 +1372,7 @@ export default function DashboardPage() {
                 Total Sessions
               </p>
 
-              <span>ðŸ“‹</span>
+              <span></span>
             </div>
 
             <p className="text-2xl font-black">
@@ -1394,23 +1394,23 @@ export default function DashboardPage() {
                 Average Score
               </p>
 
-              <span>ðŸ“Š</span>
+              <span></span>
             </div>
 
             <p className="text-2xl font-black text-primary">
               {averageScore !== null
                 ? `${averageScore}%`
-                : "â€”"}
+                : "—"}
             </p>
 
             <p className="text-xs text-muted-foreground">
               {averageScore === null
                 ? "No data yet"
                 : averageScore >= 80
-                  ? "Excellent ðŸ”¥"
+                  ? "Excellent "
                   : averageScore >= 60
-                    ? "Good ðŸ‘"
-                    : "Keep going ðŸ’ª"}
+                    ? "Good "
+                    : "Keep going "}
             </p>
           </Card>
 
@@ -1420,13 +1420,13 @@ export default function DashboardPage() {
                 Best Score
               </p>
 
-              <span>ðŸ†</span>
+              <span></span>
             </div>
 
             <p className="text-2xl font-black">
               {bestScore !== null
                 ? `${bestScore}%`
-                : "â€”"}
+                : "—"}
             </p>
 
             <p className="text-xs text-muted-foreground">
@@ -1440,13 +1440,13 @@ export default function DashboardPage() {
                 Skill Assessment
               </p>
 
-              <span>ðŸ§ </span>
+              <span></span>
             </div>
 
             <p className="text-2xl font-black">
               {skillAssessment
                 ? `${skillAssessment.skillAssessment}%`
-                : "â€”"}
+                : "—"}
             </p>
 
             <p className="text-xs text-muted-foreground">
@@ -1467,7 +1467,7 @@ export default function DashboardPage() {
           <div className="px-5 py-4 border-b border-border/40 flex items-center justify-between">
             <div>
               <p className="text-sm font-bold">
-                ðŸŽ¯ Placement Readiness
+                 Placement Readiness
               </p>
 
               <p className="text-xs text-muted-foreground mt-0.5">
@@ -1496,7 +1496,7 @@ export default function DashboardPage() {
             ) : !readiness ? (
               <div className="py-8 text-center">
                 <div className="text-4xl mb-3">
-                  ðŸŽ¯
+
                 </div>
 
                 <p className="text-sm font-semibold">
@@ -1567,14 +1567,14 @@ export default function DashboardPage() {
                       value:
                         readiness.breakdown
                           ?.resume ?? 0,
-                      icon: "ðŸ“„",
+                      icon: "",
                     },
                     {
                       label: "Interview",
                       value:
                         readiness.breakdown
                           ?.interview ?? 0,
-                      icon: "ðŸŽ¤",
+                      icon: "",
                     },
                     {
                       label: "Skills",
@@ -1582,7 +1582,7 @@ export default function DashboardPage() {
                         readiness.breakdown
                           ?.skillAssessment ??
                         0,
-                      icon: "ðŸ§ ",
+                      icon: "",
                     },
                     {
                       label: "Communication",
@@ -1590,7 +1590,7 @@ export default function DashboardPage() {
                         readiness.breakdown
                           ?.communication ??
                         0,
-                      icon: "ðŸ’¬",
+                      icon: "",
                     },
                   ].map((item) => (
                     <div
@@ -1629,7 +1629,7 @@ export default function DashboardPage() {
                   0 && (
                   <div className="p-4 rounded-xl bg-red-500/5 border border-red-500/20">
                     <p className="text-xs font-bold text-red-600 dark:text-red-400 mb-2">
-                      âš ï¸ Priority Technical
+                       Priority Technical
                       Areas
                     </p>
 
@@ -1640,7 +1640,7 @@ export default function DashboardPage() {
                             key={skill.topic}
                             className="text-xs px-2.5 py-1 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
                           >
-                            {skill.topic} Â·{" "}
+                            {skill.topic} ·{" "}
                             {skill.score}%
                           </span>
                         ),
@@ -1655,7 +1655,7 @@ export default function DashboardPage() {
                   0 && (
                   <div className="p-4 rounded-xl bg-green-500/5 border border-green-500/20">
                     <p className="text-xs font-bold text-green-600 dark:text-green-400 mb-2">
-                      âœ… Strong Technical
+                       Strong Technical
                       Areas
                     </p>
 
@@ -1666,7 +1666,7 @@ export default function DashboardPage() {
                             key={skill.topic}
                             className="text-xs px-2.5 py-1 rounded-full bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20"
                           >
-                            {skill.topic} Â·{" "}
+                            {skill.topic} ·{" "}
                             {skill.score}%
                           </span>
                         ),
@@ -1681,7 +1681,7 @@ export default function DashboardPage() {
                   0 && (
                   <div className="p-4 rounded-xl bg-orange-500/5 border border-orange-500/20">
                     <p className="text-xs font-bold text-orange-600 dark:text-orange-400 mb-2">
-                      ðŸ§© Missing Industry
+                       Missing Industry
                       Skills
                     </p>
 
@@ -1706,7 +1706,7 @@ export default function DashboardPage() {
                   0 && (
                   <div className="p-4 rounded-xl bg-primary/5 border border-primary/20">
                     <p className="text-xs font-bold text-primary mb-2">
-                      ðŸ›  Existing Industry
+                       Existing Industry
                       Skills
                     </p>
 
@@ -1731,7 +1731,7 @@ export default function DashboardPage() {
                   0 && (
                   <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/20">
                     <p className="text-xs font-bold text-blue-600 dark:text-blue-400 mb-2">
-                      ðŸ’¬ Communication Gaps
+                       Communication Gaps
                     </p>
 
                     <ul className="space-y-1">
@@ -1746,7 +1746,7 @@ export default function DashboardPage() {
                               key={`${gap}-${index}`}
                               className="text-xs text-muted-foreground"
                             >
-                              â€¢ {gap}
+                              • {gap}
                             </li>
                           ),
                         )}
@@ -1758,7 +1758,7 @@ export default function DashboardPage() {
                   0 && (
                   <div className="p-4 rounded-xl bg-green-500/5 border border-green-500/20">
                     <p className="text-xs font-bold text-green-600 mb-2">
-                      ðŸ’¬ Communication
+                       Communication
                       Strengths
                     </p>
 
@@ -1774,7 +1774,7 @@ export default function DashboardPage() {
                               key={`${strength}-${index}`}
                               className="text-xs text-muted-foreground"
                             >
-                              â€¢ {strength}
+                              • {strength}
                             </li>
                           ),
                         )}
@@ -1794,7 +1794,7 @@ export default function DashboardPage() {
           <div className="px-5 py-4 border-b border-border/40 flex items-center justify-between">
             <div>
               <p className="text-sm font-bold">
-                ðŸ“ˆ Readiness Progress
+                 Readiness Progress
               </p>
 
               <p className="text-xs text-muted-foreground mt-0.5">
@@ -1839,7 +1839,7 @@ export default function DashboardPage() {
               0 ? (
               <div className="py-8 text-center">
                 <div className="text-4xl mb-3">
-                  ðŸ“Š
+
                 </div>
 
                 <p className="text-sm font-semibold">
@@ -1866,7 +1866,7 @@ export default function DashboardPage() {
                         </p>
 
                         <p className="text-[11px] text-muted-foreground mt-0.5">
-                          First assessment â†’
+                          First assessment →
                           latest
                         </p>
                       </div>
@@ -1879,7 +1879,7 @@ export default function DashboardPage() {
                         </span>
 
                         <span className="text-primary">
-                          â†’
+                          →
                         </span>
 
                         <span className="text-xl font-black text-primary">
@@ -1958,7 +1958,7 @@ export default function DashboardPage() {
                                   )}
 
                                   {item.candidateType
-                                    ? ` Â· ${item.candidateType}`
+                                    ? ` · ${item.candidateType}`
                                     : ""}
                                 </p>
                               </div>
@@ -2035,7 +2035,7 @@ export default function DashboardPage() {
                               0 && (
                               <div className="mt-4">
                                 <p className="text-xs font-medium text-muted-foreground mb-2">
-                                  âš ï¸ Weak areas
+                                   Weak areas
                                 </p>
 
                                 <div className="flex flex-wrap gap-1.5">
@@ -2055,7 +2055,7 @@ export default function DashboardPage() {
                                           {
                                             skill.topic
                                           }{" "}
-                                          Â·{" "}
+                                          ·{" "}
                                           {
                                             skill.score
                                           }
@@ -2073,7 +2073,7 @@ export default function DashboardPage() {
                               ?.length > 0 && (
                               <div className="mt-4">
                                 <p className="text-xs font-medium text-muted-foreground mb-2">
-                                  ðŸ§© Missing industry
+                                   Missing industry
                                   skills
                                 </p>
 
@@ -2107,7 +2107,7 @@ export default function DashboardPage() {
                               ?.length > 0 && (
                               <div className="mt-4">
                                 <p className="text-xs font-medium text-muted-foreground mb-2">
-                                  ðŸ’¬ Communication
+                                   Communication
                                   gaps
                                 </p>
 
@@ -2125,7 +2125,7 @@ export default function DashboardPage() {
                                         <li
                                           key={`${item._id}-gap-${gapIndex}`}
                                         >
-                                          â€¢ {gap}
+                                          • {gap}
                                         </li>
                                       ),
                                     )}
@@ -2150,7 +2150,7 @@ export default function DashboardPage() {
           <div className="px-5 py-4 border-b border-border/40 flex items-center justify-between gap-3">
             <div>
               <p className="text-sm font-bold">
-                ðŸ¤– AI Personalized Roadmap
+                 AI Personalized Roadmap
               </p>
 
               <p className="text-xs text-muted-foreground mt-0.5">
@@ -2167,8 +2167,8 @@ export default function DashboardPage() {
               {roadmapLoading
                 ? "Generating..."
                 : roadmap
-                  ? "ðŸ”„ Regenerate"
-                  : "âœ¨ Generate Roadmap"}
+                  ? " Regenerate"
+                  : " Generate Roadmap"}
             </Button>
           </div>
 
@@ -2189,7 +2189,7 @@ export default function DashboardPage() {
             ) : roadmapError ? (
               <div className="py-8 text-center">
                 <div className="text-3xl mb-3">
-                  âš ï¸
+
                 </div>
 
                 <p className="text-sm font-semibold">
@@ -2211,7 +2211,7 @@ export default function DashboardPage() {
             ) : !roadmap ? (
               <div className="py-8 text-center">
                 <div className="text-4xl mb-3">
-                  ðŸ—ºï¸
+
                 </div>
 
                 <p className="text-sm font-semibold">
@@ -2230,7 +2230,7 @@ export default function DashboardPage() {
                   onClick={fetchRoadmap}
                   className="mt-4 rounded-full bg-gradient-to-r from-primary to-accent text-white"
                 >
-                  âœ¨ Generate My Roadmap
+                   Generate My Roadmap
                 </Button>
               </div>
             ) : (
@@ -2239,7 +2239,7 @@ export default function DashboardPage() {
 
                 <div className="p-4 rounded-xl bg-primary/5 border border-primary/20">
                   <p className="text-xs font-bold mb-2">
-                    ðŸŽ¯ Your Current Direction
+                     Your Current Direction
                   </p>
 
                   <p className="text-sm text-muted-foreground leading-relaxed">
@@ -2253,7 +2253,7 @@ export default function DashboardPage() {
                   ?.length > 0 && (
                   <div>
                     <p className="text-sm font-bold mb-3">
-                      ðŸ”¥ Immediate Priorities
+                       Immediate Priorities
                     </p>
 
                     <div className="grid md:grid-cols-3 gap-3">
@@ -2304,7 +2304,7 @@ export default function DashboardPage() {
                   ?.length > 0 && (
                   <div>
                     <p className="text-sm font-bold mb-3">
-                      ðŸ›  Technologies & Concepts
+                       Technologies & Concepts
                     </p>
 
                     <div className="grid md:grid-cols-2 gap-3">
@@ -2353,7 +2353,7 @@ export default function DashboardPage() {
                   ?.length > 0 && (
                   <div>
                     <p className="text-sm font-bold mb-3">
-                      ðŸš€ Projects To Build
+                       Projects To Build
                     </p>
 
                     <div className="space-y-3">
@@ -2441,7 +2441,7 @@ export default function DashboardPage() {
                   ?.length > 0 && (
                   <div>
                     <p className="text-sm font-bold mb-3">
-                      ðŸŽ“ Recommended
+                       Recommended
                       Certifications
                     </p>
 
@@ -2482,7 +2482,7 @@ export default function DashboardPage() {
                   ?.length > 0 && (
                   <div>
                     <p className="text-sm font-bold mb-3">
-                      ðŸŽ¤ Interview Topics To
+                       Interview Topics To
                       Practice
                     </p>
 
@@ -2527,7 +2527,7 @@ export default function DashboardPage() {
                   ?.length > 0 && (
                   <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/20">
                     <p className="text-xs font-bold text-blue-600 mb-2">
-                      ðŸ’¬ Communication
+                       Communication
                       Improvement
                     </p>
 
@@ -2538,7 +2538,7 @@ export default function DashboardPage() {
                             key={item}
                             className="text-xs text-muted-foreground"
                           >
-                            â€¢ {item}
+                            • {item}
                           </li>
                         ),
                       )}
@@ -2552,7 +2552,7 @@ export default function DashboardPage() {
                   ?.length > 0 && (
                   <div>
                     <p className="text-sm font-bold mb-3">
-                      ðŸ“… First 30 Days
+                       First 30 Days
                     </p>
 
                     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -2583,7 +2583,7 @@ export default function DashboardPage() {
                                     }
                                     className="text-[11px] text-muted-foreground"
                                   >
-                                    â€¢ {action}
+                                    • {action}
                                   </li>
                                 ),
                               )}
@@ -2602,7 +2602,7 @@ export default function DashboardPage() {
                     ?.length > 0 && (
                     <div className="p-4 rounded-xl border border-border/50">
                       <p className="text-xs font-bold text-primary mb-2">
-                        ðŸ“ˆ 60-Day Goal
+                         60-Day Goal
                       </p>
 
                       {roadmap.sixtyDayPlan.map(
@@ -2630,7 +2630,7 @@ export default function DashboardPage() {
                                     }
                                     className="text-xs text-muted-foreground"
                                   >
-                                    â€¢ {action}
+                                    • {action}
                                   </li>
                                 ),
                               )}
@@ -2645,7 +2645,7 @@ export default function DashboardPage() {
                     ?.length > 0 && (
                     <div className="p-4 rounded-xl border border-border/50">
                       <p className="text-xs font-bold text-primary mb-2">
-                        ðŸ† 90-Day Goal
+                         90-Day Goal
                       </p>
 
                       {roadmap.ninetyDayPlan.map(
@@ -2673,7 +2673,7 @@ export default function DashboardPage() {
                                     }
                                     className="text-xs text-muted-foreground"
                                   >
-                                    â€¢ {action}
+                                    • {action}
                                   </li>
                                 ),
                               )}
@@ -2698,7 +2698,7 @@ export default function DashboardPage() {
             <div className="px-5 py-4 border-b border-border/40 flex items-center justify-between">
               <div>
                 <p className="text-sm font-bold">
-                  ðŸ§  Skill Assessment
+                   Skill Assessment
                 </p>
 
                 <p className="text-xs text-muted-foreground">
@@ -2779,7 +2779,7 @@ export default function DashboardPage() {
                 .length > 0 && (
                 <div className="mt-5 p-4 rounded-xl bg-red-500/5 border border-red-500/20">
                   <p className="text-xs font-bold text-red-600 mb-2">
-                    âš ï¸ Areas That Need
+                     Areas That Need
                     Improvement
                   </p>
 
@@ -2790,7 +2790,7 @@ export default function DashboardPage() {
                           key={skill.topic}
                           className="text-xs px-2.5 py-1 rounded-full bg-red-500/10 text-red-600 border border-red-500/20"
                         >
-                          {skill.topic} Â·{" "}
+                          {skill.topic} ·{" "}
                           {skill.score}%
                         </span>
                       ),
@@ -2803,7 +2803,7 @@ export default function DashboardPage() {
                 .length > 0 && (
                 <div className="mt-3 p-4 rounded-xl bg-green-500/5 border border-green-500/20">
                   <p className="text-xs font-bold text-green-600 mb-2">
-                    âœ… Strong Areas
+                     Strong Areas
                   </p>
 
                   <div className="flex flex-wrap gap-2">
@@ -2813,7 +2813,7 @@ export default function DashboardPage() {
                           key={skill.topic}
                           className="text-xs px-2.5 py-1 rounded-full bg-green-500/10 text-green-600 border border-green-500/20"
                         >
-                          {skill.topic} Â·{" "}
+                          {skill.topic} ·{" "}
                           {skill.score}%
                         </span>
                       ),
@@ -2893,8 +2893,8 @@ export default function DashboardPage() {
                 }`}
               >
                 {tab === "resume"
-                  ? "ðŸ“„ Resume Analysis"
-                  : "ðŸ§  Skill Assessment"}
+                  ? " Resume Analysis"
+                  : " Skill Assessment"}
               </button>
             ))}
           </div>
@@ -2921,7 +2921,7 @@ export default function DashboardPage() {
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h2 className="text-lg font-bold">
-                      ðŸ§  Detailed Skill Assessment
+                       Detailed Skill Assessment
                     </h2>
 
                     <p className="text-xs text-muted-foreground mt-1">
@@ -2960,7 +2960,7 @@ export default function DashboardPage() {
                     .length === 0 ? (
                   <div className="py-10 text-center">
                     <div className="text-4xl mb-3">
-                      ðŸ§ 
+
                     </div>
 
                     <p className="text-sm font-semibold">
@@ -3060,7 +3060,7 @@ export default function DashboardPage() {
                 }
                 className="w-8 h-8 rounded-full bg-muted flex items-center justify-center"
               >
-                âœ•
+
               </button>
             </div>
 
@@ -3118,7 +3118,7 @@ export default function DashboardPage() {
                           : "opacity-0"
                       }`}
                     >
-                      â†’
+                      →
                     </span>
                   </button>
                 ),
