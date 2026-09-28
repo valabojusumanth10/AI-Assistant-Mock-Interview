@@ -1,59 +1,44 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import axiosInstance from "@/lib/axios";
 
 type Status = "verifying" | "success" | "error";
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [status, setStatus] = useState<Status>("verifying");
+  const [status, setStatus] =
+    useState<Status>("verifying");
+
   const [message, setMessage] = useState(
     "We're verifying your email address..."
   );
 
-  // Prevent React Strict Mode from sending the verification
-  // request twice during development.
+  // Prevent React Strict Mode from sending the
+  // verification request twice during development.
   const verificationStarted = useRef(false);
-
-  useEffect(() => {
-    const token = searchParams.get("token");
-
-    if (!token) {
-      setStatus("error");
-      setMessage(
-        "This verification link is invalid because the verification token is missing."
-      );
-      return;
-    }
-
-    if (verificationStarted.current) {
-      return;
-    }
-
-    verificationStarted.current = true;
-
-    verifyEmail(token);
-  }, [searchParams]);
 
   const verifyEmail = async (token: string) => {
     try {
       setStatus("verifying");
-      setMessage("We're verifying your email address...");
-
-      const response = await axiosInstance.post(
-        "/api/auth/verify-email",
-        {
-          token,
-        },
-        {
-          validateStatus: (status) =>
-            status >= 200 && status < 500,
-        }
+      setMessage(
+        "We're verifying your email address..."
       );
+
+      const response =
+        await axiosInstance.post(
+          "/api/auth/verify-email",
+          {
+            token,
+          },
+          {
+            validateStatus: (status) =>
+              status >= 200 && status < 500,
+          }
+        );
 
       if (
         response.status >= 200 &&
@@ -84,11 +69,31 @@ export default function VerifyEmailPage() {
       setStatus("error");
 
       setMessage(
-        error.response?.data?.message ||
+        error?.response?.data?.message ||
           "Something went wrong while verifying your email. Please try again."
       );
     }
   };
+
+  useEffect(() => {
+    const token = searchParams.get("token");
+
+    if (!token) {
+      setStatus("error");
+      setMessage(
+        "This verification link is invalid because the verification token is missing."
+      );
+      return;
+    }
+
+    if (verificationStarted.current) {
+      return;
+    }
+
+    verificationStarted.current = true;
+
+    verifyEmail(token);
+  }, [searchParams]);
 
   const handleLogin = () => {
     router.push("/login");
@@ -213,5 +218,47 @@ export default function VerifyEmailPage() {
         </p>
       </div>
     </main>
+  );
+}
+
+function VerifyEmailLoading() {
+  return (
+    <main className="min-h-screen bg-background flex items-center justify-center px-4">
+      <div className="w-full max-w-md">
+        <div className="rounded-2xl border border-border/60 bg-card p-8 shadow-xl text-center">
+          <div className="flex justify-center mb-6">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
+              <span className="text-white text-xl font-black">
+                AI
+              </span>
+            </div>
+          </div>
+
+          <div className="flex justify-center mb-6">
+            <div className="w-12 h-12 border-4 border-muted border-t-primary rounded-full animate-spin" />
+          </div>
+
+          <h1 className="text-2xl font-bold text-foreground mb-2">
+            Loading verification
+          </h1>
+
+          <p className="text-sm text-muted-foreground">
+            Please wait...
+          </p>
+        </div>
+
+        <p className="text-center text-xs text-muted-foreground mt-5">
+          Placement AI · AI Powered Interview Preparation
+        </p>
+      </div>
+    </main>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={<VerifyEmailLoading />}>
+      <VerifyEmailContent />
+    </Suspense>
   );
 }
