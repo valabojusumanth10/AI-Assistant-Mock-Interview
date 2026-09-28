@@ -897,6 +897,9 @@ Rules:
           temperature: 0.1,
 
           max_tokens: 300,
+          response_format: {
+  type: "json_object",
+},
         });
     } catch (error) {
       console.error(
@@ -1922,6 +1925,9 @@ Return ONLY valid JSON.
           temperature: 0.2,
 
           max_tokens: 1800,
+          response_format: {
+  type: "json_object",
+},
         });
     } catch (aiError) {
       console.error(
